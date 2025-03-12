@@ -16,6 +16,7 @@
 - [LoRA extraction](#lora-extraction)
 - [Mixture of Experts merging](#mixture-of-experts-merging)
 - [Evolutionary merge methods](#evolutionary-merge-methods)
+- [ASR Model Evaluation](#asr-model-evaluation)
 - [Merge in the Cloud](#-merge-in-the-cloud-)
 - [Citation](#citation)
 
@@ -35,7 +36,7 @@ Unlike traditional ensembling which requires running multiple models, merged mod
 
 Key features of `mergekit` include:
 
-- Supports Llama, Mistral, GPT-NeoX, StableLM, and more
+- Supports Llama, Mistral, GPT-NeoX, StableLM, Whisper, and more
 - Many [merge methods](#merge-methods)
 - GPU or CPU execution
 - Lazy loading of tensors for low memory use
@@ -44,6 +45,7 @@ Key features of `mergekit` include:
 - [Mixture of Experts merging](#mixture-of-experts-merging)
 - [LORA extraction](#lora-extraction)
 - [Evolutionary merge methods](#evolutionary-merge-methods)
+- [ASR model evaluation](#asr-model-evaluation) for Whisper models
 
 🌐 GUI Launch Alert 🤗 - We are excited to announce the launch of a mega-GPU backed graphical user interface for mergekit in Arcee! This GUI simplifies the merging process, making it more accessible to a broader audience. Check it out and contribute at the [Arcee App](https://app.arcee.ai). There is also a [Hugging Face Space](https://huggingface.co/mergekit-community) with limited amounts of GPUs.
 
@@ -53,7 +55,17 @@ Key features of `mergekit` include:
 git clone https://github.com/arcee-ai/mergekit.git
 cd mergekit
 
+# Basic installation
 pip install -e .  # install the package and make scripts available
+
+# Installation with Poetry (recommended)
+poetry install  # install the base package
+
+# To include Whisper ASR evaluation tools
+poetry install --with whisper
+
+# To include vllm support
+poetry install --with vllm
 ```
 
 If the above fails with the error of:
@@ -370,6 +382,60 @@ The `mergekit-moe` script supports merging multiple dense models into a mixture 
 ## Evolutionary merge methods
 
 See [`docs/evolve.md`](docs/evolve.md) for details.
+
+## ASR Model Evaluation
+
+MergeKit provides tools for evaluating Automatic Speech Recognition (ASR) models, particularly Whisper models. These tools help assess the quality of merged ASR models by calculating standard metrics like Word Error Rate (WER), Character Error Rate (CER), and BLEU scores.
+
+### Installation
+
+To use the ASR evaluation tools, you need to install the required dependencies:
+
+```bash
+# If using pip
+pip install "mergekit[whisper]"
+
+# If using Poetry
+poetry install --with whisper
+```
+
+### Basic Evaluation
+
+Evaluate a single Whisper model on a dataset:
+
+```bash
+mergekit-evaluate-whisper \
+  --model path/to/whisper/model \
+  --dataset mozilla-foundation/common_voice_11_0 \
+  --split test \
+  --language en \
+  --max-samples 100
+```
+
+### Comparing Multiple Models
+
+Compare multiple Whisper models on the same dataset:
+
+```bash
+mergekit-compare-whisper \
+  --models path/to/model1 path/to/model2 path/to/merged_model \
+  --model-names "Base Model" "Fine-tuned Model" "Merged Model" \
+  --dataset mozilla-foundation/common_voice_11_0 \
+  --language en
+```
+
+### Multilingual Evaluation
+
+Evaluate a Whisper model across multiple languages:
+
+```bash
+mergekit-evaluate-whisper-multilingual \
+  --model path/to/whisper/model \
+  --languages en fr de es \
+  --dataset mozilla-foundation/common_voice_11_0
+```
+
+For more detailed information, see [`docs/whisper-evaluation.md`](docs/whisper-evaluation.md).
 
 ## ✨ Merge in the Cloud ✨
 
